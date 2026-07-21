@@ -1,0 +1,19 @@
+{
+  "app": {
+    "name": "intouch-client",
+    "port": 3000
+  },
+  "server": {
+    "host": "134.209.231.164",
+    "user": "root",
+    "path": "/var/www/intouch/client"
+  },
+  "domain": "intouch.uz",
+  "telegram": {
+    "bot_token": "7734691310:AAEEVynS6-ixbRO5HHgH5gx9lHRwPEDYOHI",
+    "chat_id": "-5046289962"
+  },
+  "git": {
+    "branch": "master"
+  }
+}

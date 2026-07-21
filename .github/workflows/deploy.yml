@@ -1,0 +1,142 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Read deploy config
+        id: config
+        run: |
+          echo "APP_NAME=$(jq -r '.app.name' deploy.config.json)" >> $GITHUB_OUTPUT
+          echo "APP_PORT=$(jq -r '.app.port' deploy.config.json)" >> $GITHUB_OUTPUT
+          echo "SERVER_PATH=$(jq -r '.server.path' deploy.config.json)" >> $GITHUB_OUTPUT
+          echo "DOMAIN=$(jq -r '.domain' deploy.config.json)" >> $GITHUB_OUTPUT
+          echo "BRANCH=$(jq -r '.git.branch' deploy.config.json)" >> $GITHUB_OUTPUT
+          echo "TG_BOT_TOKEN=$(jq -r '.telegram.bot_token' deploy.config.json)" >> $GITHUB_OUTPUT
+          echo "TG_CHAT_ID=$(jq -r '.telegram.chat_id' deploy.config.json)" >> $GITHUB_OUTPUT
+
+      - name: Record start time
+        id: start_time
+        run: echo "START_TIME=$(date +%s)" >> $GITHUB_OUTPUT
+
+      - name: Send Telegram notification (Start)
+        run: |
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          MESSAGE="🚀 Deploy started: ${{ steps.config.outputs.APP_NAME }}%0A${{ github.actor }} deployed to ${{ github.repository }} on ${{ github.ref }}%0A📝 ${COMMIT_MSG}%0A🔗 <a href=\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\">view details</a>"
+          curl -s -X POST "https://api.telegram.org/bot${{ steps.config.outputs.TG_BOT_TOKEN }}/sendMessage" \
+            -d chat_id="${{ steps.config.outputs.TG_CHAT_ID }}" \
+            -d text="$MESSAGE" \
+            -d parse_mode="HTML"
+
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            set -e
+
+            APP_NAME="${{ steps.config.outputs.APP_NAME }}"
+            APP_PORT="${{ steps.config.outputs.APP_PORT }}"
+            SERVER_PATH="${{ steps.config.outputs.SERVER_PATH }}"
+            DOMAIN="${{ steps.config.outputs.DOMAIN }}"
+            BRANCH="${{ steps.config.outputs.BRANCH }}"
+            REPO_URL="https://x-access-token:${{ secrets.GH_PAT }}@github.com/${{ github.repository }}.git"
+
+            # Install Node.js if not installed
+            if ! command -v node &> /dev/null; then
+              curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+              sudo apt-get install -y nodejs
+            fi
+
+            # Install PM2 if not installed
+            if ! command -v pm2 &> /dev/null; then
+              sudo npm install -g pm2
+            fi
+
+            # Create parent directory if not exists
+            mkdir -p $(dirname "$SERVER_PATH")
+
+            # Clone or pull repository
+            if [ ! -d "$SERVER_PATH" ]; then
+              echo "Cloning repository..."
+              git clone -b $BRANCH $REPO_URL $SERVER_PATH
+            else
+              echo "Pulling latest changes..."
+              cd $SERVER_PATH
+              git remote set-url origin $REPO_URL
+              git fetch origin
+              git reset --hard origin/$BRANCH
+            fi
+
+            cd $SERVER_PATH
+
+            # Install dependencies and build
+            npm ci
+            npm run build
+
+            # Start or restart with PM2
+            if pm2 describe $APP_NAME > /dev/null 2>&1; then
+              pm2 restart $APP_NAME
+            else
+              pm2 start npm --name "$APP_NAME" -- start
+            fi
+            pm2 save
+
+            # Setup Nginx if not configured
+            NGINX_CONF="/etc/nginx/sites-available/$DOMAIN"
+            if [ ! -f "$NGINX_CONF" ]; then
+              # Install Nginx if not installed
+              if ! command -v nginx &> /dev/null; then
+                sudo apt-get update
+                sudo apt-get install -y nginx
+              fi
+
+              echo "server { listen 80; server_name $DOMAIN; location / { proxy_pass http://localhost:$APP_PORT; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection 'upgrade'; proxy_set_header Host \$host; proxy_set_header X-Real-IP \$remote_addr; proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for; proxy_set_header X-Forwarded-Proto \$scheme; proxy_cache_bypass \$http_upgrade; } }" | sudo tee $NGINX_CONF > /dev/null
+
+              sudo ln -sf $NGINX_CONF /etc/nginx/sites-enabled/
+              sudo nginx -t && sudo systemctl reload nginx
+
+              # Install Certbot and get SSL certificate
+              if ! command -v certbot &> /dev/null; then
+                sudo apt-get install -y certbot python3-certbot-nginx
+              fi
+              sudo certbot --nginx -d $DOMAIN --non-interactive --agree-tos -m admin@$DOMAIN || true
+            fi
+
+      - name: Send Telegram notification (Success)
+        if: success()
+        run: |
+          END_TIME=$(date +%s)
+          DURATION=$((END_TIME - ${{ steps.start_time.outputs.START_TIME }}))
+          MINUTES=$((DURATION / 60))
+          SECONDS=$((DURATION % 60))
+          MESSAGE="✅ Deploy successful!%0A⏱ Deployment completed in ${MINUTES} minutes and ${SECONDS} seconds%0A${{ github.actor }} deployed to ${{ github.repository }} on ${{ github.ref }}%0A🔗 <a href=\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\">view details</a>"
+          curl -s -X POST "https://api.telegram.org/bot${{ steps.config.outputs.TG_BOT_TOKEN }}/sendMessage" \
+            -d chat_id="${{ steps.config.outputs.TG_CHAT_ID }}" \
+            -d text="$MESSAGE" \
+            -d parse_mode="HTML"
+
+      - name: Send Telegram notification (Failure)
+        if: failure()
+        run: |
+          END_TIME=$(date +%s)
+          DURATION=$((END_TIME - ${{ steps.start_time.outputs.START_TIME }}))
+          MINUTES=$((DURATION / 60))
+          SECONDS=$((DURATION % 60))
+          MESSAGE="❌ Deploy failed!%0A⏱ Failed after ${MINUTES} minutes and ${SECONDS} seconds%0A${{ github.actor }} deployed to ${{ github.repository }} on ${{ github.ref }}%0A🔗 <a href=\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\">view details</a>"
+          curl -s -X POST "https://api.telegram.org/bot${{ steps.config.outputs.TG_BOT_TOKEN }}/sendMessage" \
+            -d chat_id="${{ steps.config.outputs.TG_CHAT_ID }}" \
+            -d text="$MESSAGE" \
+            -d parse_mode="HTML"

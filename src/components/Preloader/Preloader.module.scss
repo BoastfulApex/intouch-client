@@ -1,0 +1,96 @@
+@import '@/styles/mixins.scss';
+.preloader{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    color: #fff;
+    z-index: 999999999999999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    transition: opacity 300ms ease-out;
+    @include res('gap', 16px);
+    @include media(576){
+        @include resa('gap', 16px);
+    }
+    &.hide{
+        opacity: 0;
+        visibility: hidden;
+    }
+    .el{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        @include res('max-width', 50px);
+        @include res('gap', 8px);
+        @include media(576){
+            @include resa('max-width', 50px);
+            @include resa('gap', 8px);
+        }
+    }
+    span{
+        display: block;
+        border-radius: 50%;
+        background: #fff;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 300ms ease-out;
+        animation: fadeIn 0.3s ease-out forwards;
+        @include res('width', 10px);
+        @include res('height', 10px);
+        @include media(576){
+            @include resa('width', 10px);
+            @include resa('height', 10px);
+        }
+        &:nth-child(1) { animation-delay: 0s; visibility: visible; }
+        &:nth-child(2) { animation-delay: 0.1s; visibility: visible; }
+        &:nth-child(3) { 
+            background: #000;
+            outline: solid #fff;
+            border: solid #fff;
+            animation-delay: 0.2s;
+            visibility: visible;
+            @include res('border-width', 1px);
+            @include res('outline-width', 1px);
+            @include media(576){
+                @include resa('border-width', 1px);
+                @include resa('outline-width', 1px);
+            }
+        }
+        &:nth-child(4) { animation-delay: 0.3s; visibility: visible; }
+        &:nth-child(5) { animation-delay: 0.4s; visibility: visible; }
+        &:nth-child(6) { animation-delay: 0.5s; visibility: visible; }
+        &:nth-child(7) { animation-delay: 0.6s; visibility: visible; }
+        &:nth-child(8) { animation-delay: 0.7s; visibility: visible; }
+        &:nth-child(9) { animation-delay: 0.8s; visibility: visible; }
+    }
+    p{
+        font-weight: 500;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 300ms ease-out;
+        animation: fadeIn 0.3s ease-out forwards;
+        animation-delay: 1.1s; visibility: visible;
+        @include res('font-size', 18px);
+        @include media(576){
+            @include resa('font-size', 18px);
+        }
+    }
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}

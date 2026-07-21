@@ -1,0 +1,24 @@
+@mixin media($size) {
+  @media (max-width:#{$size}px) {
+    @content;
+  }
+}
+
+$baseValueMedium: 1440px;
+$baseValueSmall: 392px;
+
+@mixin res($property, $value, $important: false) {
+  #{$property}: calc(($value / $baseValueMedium) * 100vw) #{if(
+      $important,
+      " !important",
+      ""
+    )};
+}
+
+@mixin resa($property, $value, $important: false) {
+  #{$property}: calc(($value / $baseValueSmall) * 100vw) #{if(
+      $important,
+      " !important",
+      ""
+    )};
+}

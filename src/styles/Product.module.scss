@@ -1,0 +1,274 @@
+@import '@/styles/mixins.scss';
+.product{
+  padding-top: 2.7777777778vw;
+  @include media(576){
+    padding-top: 8.1632653061vw;
+  }
+}
+.bread{
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    color: #fff;
+    text-decoration: none;
+    padding-bottom: 2.7777777778vw;
+    @include res('gap', 4px);
+    @include media(576){
+        @include resa('gap', 4px);
+        padding-bottom: 8.1632653061vw;
+    }
+    svg{
+        @include res('width', 20px);
+        @include res('height', 20px);
+        @include media(576){
+            @include resa('width', 20px);
+            @include resa('height', 20px);
+        }
+    }
+    &Item{
+        text-decoration: none;
+        @include res('font-size', 14px);
+        @include media(576){
+            @include resa('font-size', 14px);
+        }
+        &.active{
+            color: var(--primary);
+            font-weight: 500;
+        }
+    }
+}
+.title{
+    display: none;
+    @include media(576){
+        display: block;
+        color: #fff;
+        font-weight: 500;
+        @include resa('margin-bottom', 16px);
+        @include resa('font-size', 24px);
+    }
+}
+.content{
+    display: flex;
+    @include res('gap', 36px);
+    @include media(576){
+        @include resa('gap', 24px);
+        flex-direction: column;
+    }
+}
+.info{
+    display: flex;
+    flex-direction: column;
+}
+.name{
+    font-weight: 500;
+    @include res('margin-bottom', 12px);
+    @include res('font-size', 24px);
+    @include media(576){
+        display: none;
+    }
+}
+.subtitle{
+    @include res('margin-bottom', 12px);
+    @include res('font-size', 18px);
+    @include media(576){
+        @include resa('margin-bottom', 12px);
+        @include resa('font-size', 18px);
+    }
+}
+.attr{
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    @include res('gap', 8px);
+    @include res('font-size', 16px);
+    @include media(576){
+        @include resa('gap', 8px);
+        @include resa('font-size', 16px);
+    }
+    &:not(:last-of-type){
+        @include res('margin-bottom', 4px);
+        @include media(576){
+            @include resa('margin-bottom', 8px);
+        }
+    }
+    span{
+        color: rgba(#fff, .7);
+    }
+}
+.desc{
+    line-height: 150%;
+    @include res('margin-top', 12px);
+    @include res('font-size', 14px);
+    @include media(576){
+        @include resa('margin-top', 12px);
+        @include resa('font-size', 14px);
+    }
+}
+.file{
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: max-content;
+    text-decoration: none;
+    color: var(--primary);
+    @include res('gap', 6px);
+    @include res('margin-top', 12px);
+    @include res('font-size', 16px);
+    @include media(576){
+        @include resa('gap', 6px);
+        @include resa('margin-top', 12px);
+        @include resa('font-size', 16px);
+    }
+    svg{
+        @include res('width', 18px);
+        @include res('height', 18px);
+        @include media(576){
+            @include resa('width', 18px);
+            @include resa('height', 18px);
+        }
+    }
+}
+.flb{
+    flex: 1 1 auto;
+}
+.action{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+    @include res('gap', 24px);
+    @include res('margin-top', 24px);
+    @include media(576){
+        width: 100%;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-start;
+        @include resa('margin-top', 24px);
+        @include resa('gap', 24px);
+    }
+}
+.price{
+    font-weight: 600;
+    color: #fff;
+    @include res('font-size', 24px);
+    @include media(576){
+        @include resa('font-size', 24px);
+    }
+}
+.btn{
+    flex: 1 1 auto;
+    @include media(576){
+        width: 100%;
+        font-weight: 400;
+        @include resa('height', 56px);
+    }
+}
+.swiper {
+  @include res('width', 592px);
+  @include res('min-width', 592px);
+  @include res('height', 480px);
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  @include media(576) {
+    width: 100%;
+    min-width: 100%;
+    flex-direction: column;
+    @include resa('gap', 10px);
+    @include resa('height', 464px);
+  }
+  &.showAfter {
+    & > div:nth-of-type(2) {
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 100%;
+        @include res('height', 50px);
+        background: linear-gradient(
+          0deg,
+          #f9f8f4 0%,
+          rgba(249, 248, 244, 0) 100%
+        );
+        z-index: 10;
+        pointer-events: none;
+        @include media(576) {
+          @include resa('height', 50px);
+          display: none;
+        }
+      }
+    }
+  }
+  & > div {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    position: relative;
+    overflow: hidden;
+    @include res('border-radius', 18px);
+    @include media(576) {
+      @include resa('border-radius', 18px);
+    }
+    &:nth-of-type(1) {
+      @include res('width', 470px);
+      @include res('min-width', 470px);
+      @include media(576) {
+        @include resa('height', 364px);
+        @include resa('width', 364px);
+        @include resa('min-width', 364px);
+      }
+      & > div > div {
+        line-height: 0;
+        @include res('border-radius', 18px);
+        overflow: hidden;
+        @include media(576) {
+          @include resa('border-radius', 18px);
+        }
+        img {
+          line-height: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+      }
+    }
+    &:nth-of-type(2) {
+      position: relative;
+      overflow: hidden;
+      @include res('width', 110px);
+      @include res('border-radius', 18px);
+      @include media(576) {
+        @include resa('width', 364px);
+        @include resa('border-radius', 18px);
+      }
+      & > div {
+        & > div {
+          line-height: 0;
+          overflow: hidden;
+          @include res('width', 110px);
+          @include res('height', 110px);
+          @include res('border-radius', 18px);
+          @include media(576) {
+            @include resa('width', 90px);
+            @include resa('height', 90px);
+            @include resa('border-radius', 18px);
+          }
+          cursor: pointer;
+          &:not(:last-of-type) {
+            @include res('margin-bottom', 20px);
+            @include media(576) {
+              @include resa('margin-bottom', 0px);
+              @include resa('margin-right', 10px);
+            }
+          }
+          img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+        }
+      }
+    }
+  }
+}
