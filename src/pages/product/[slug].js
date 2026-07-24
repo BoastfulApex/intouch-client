@@ -40,10 +40,39 @@ export default function ProductPage({product}) {
     return (
         <>
             <Head>
-                <title>{product.Title} — Intouch</title>
+                <title>{`${product.Title} — купить в Ташкенте | Intouch`}</title>
                 <meta name="description" content={product.Description} />
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <link rel="icon" href="/favicon.png" />
+                <link rel="canonical" href={`https://intouch.uz/product/${product.Slug}`} />
+                <meta property="og:type" content="product" />
+                <meta property="og:title" content={`${product.Title} — Intouch`} />
+                <meta property="og:description" content={product.Description} />
+                <meta property="og:url" content={`https://intouch.uz/product/${product.Slug}`} />
+                {product.Photos?.[0]?.url && (
+                    <meta property="og:image" content={`${process.env.NEXT_PUBLIC_SERVER_URL}${product.Photos[0].url}`} />
+                )}
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{
+                        __html: JSON.stringify({
+                            "@context": "https://schema.org",
+                            "@type": "Product",
+                            name: product.Title,
+                            description: product.Description,
+                            image: product.Photos?.map((p) => `${process.env.NEXT_PUBLIC_SERVER_URL}${p.url}`) || [],
+                            url: `https://intouch.uz/product/${product.Slug}`,
+                            brand: { "@type": "Brand", name: "Intouch" },
+                            offers: {
+                                "@type": "Offer",
+                                price: product.Price,
+                                priceCurrency: "USD",
+                                availability: "https://schema.org/InStock",
+                                url: `https://intouch.uz/product/${product.Slug}`,
+                            },
+                        }),
+                    }}
+                />
             </Head>
             <section className={styles.product}>
                 <div className={`container ${styles.container}`}>
@@ -67,10 +96,10 @@ export default function ProductPage({product}) {
                         >
                             {product.Photos.map((img, index) => (
                                 <SwiperSlide key={index}>
-                                    <Image  
+                                    <Image
                                         src={`${process.env.NEXT_PUBLIC_SERVER_URL}${product.Photos[index].url}`}
-                                        alt=""
-                                        width="325" 
+                                        alt={`${product.Title} — фото ${index + 1}`}
+                                        width="325"
                                         height="325"
                                         draggable="false"
                                     />
@@ -107,7 +136,7 @@ export default function ProductPage({product}) {
                         </Swiper>
                     </div>
                     <div className={styles.info}>
-                        <h1 className={styles.name}>{product.Title}</h1>
+                        <h2 className={styles.name}>{product.Title}</h2>
                         <p className={styles.subtitle}>Технические характеристики</p>
                         {product.Attr && Object.entries(product.Attr).map(([key, value], index) => (
                             <div className={styles.attr} key={index}>

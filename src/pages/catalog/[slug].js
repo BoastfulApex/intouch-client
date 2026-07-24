@@ -4,15 +4,16 @@ import Contacts from "@/components/Contacts/Contacts";
 import Partners from "@/components/Partners/Partners";
 import Head from "next/head";
 
-export default function CatalogSlugPage({ products, category }) {
+export default function CatalogSlugPage({ products, category, slug }) {
     
     return (
         <>
             <Head>
-                <title>{category[0].Title} — Intouch</title>
-                <meta name="description" content="Каталог продукции" />
+                <title>{`${category[0].Title} — купить в Ташкенте | Intouch`}</title>
+                <meta name="description" content={`${category[0].Title} от Intouch — цены, характеристики и заказ в Ташкенте. Интерактивные панели, доски и инфокиоски в Узбекистане.`} />
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <link rel="icon" href="/favicon.png" />
+                <link rel="canonical" href={`https://intouch.uz/catalog/${slug}`} />
             </Head>
 
             <section className="container" id="intro">
@@ -69,6 +70,7 @@ export async function getServerSideProps(context) {
         props: {
             category,
             products,
+            slug,
         },
     };
 }
